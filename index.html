@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Mobile Instrument Buttons</title>
+  <script src="https://unpkg.com/tone"></script>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #1a1a2e;
+    }
+
+    /* Phone container keeps aspect ratio (720x1080 ~ 2:3) */
+    .phone-container {
+      position: relative;
+      width: 90vw;            /* scale to screen */
+      max-width: 500px;       /* limit width */
+      aspect-ratio: 2 / 3;    /* keeps proportions */
+      background: #300030;
+      border: 2px solid #ffffff;
+      overflow: hidden;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Buttons use percentages instead of fixed px */
+    .action-button {
+      width: 15%;    /* responsive */
+      aspect-ratio: 1/1;
+      background: #ff33cc;
+      border-radius: 50%;
+      border: none;
+      position: absolute;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3),
+                  inset 0 2px 4px rgba(255,255,255,0.5);
+      transition: transform 0.2s ease;
+      touch-action: manipulation;
+    }
+
+    .action-button:active {
+      transform: scale(0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="phone-container">
+    <!-- Same relative positions (converted to %) -->
+    <button class="action-button" style="left: 15%; top: 63%;" data-note="B4"></button>
+    <button class="action-button" style="left: 11%; top: 42%;" data-note="C5"></button>
+    <button class="action-button" style="left: 26%; top: 23%;" data-note="D5"></button>
+    <button class="action-button" style="left: 39%; top: 9%;"  data-note="E5"></button>
+    <button class="action-button" style="left: 56%; top: 62%;" data-note="B5"></button>
+    <button class="action-button" style="left: 44%; top: 45%;" data-note="C6"></button>
+    <button class="action-button" style="left: 58%; top: 31%;" data-note="D6"></button>
+    <button class="action-button" style="left: 76%; top: 14%;" data-note="E6"></button>
+    <button class="action-button" style="left: 69%; top: 83%;" data-note="B3"></button>
+    <button class="action-button" style="left: 42%; top: 83%;" data-note="C4"></button>
+    <button class="action-button" style="left: 14%; top: 83%;" data-note="D4"></button>
+  </div>
+
+  <script>
+    // Instrument setup
+    const synth = new Tone.Synth({
+      oscillator: { type: "triangle" },
+      envelope: {
+        attack: 0.01,
+        decay: 0.2,
+        sustain: 0.4,
+        release: 1
+      }
+    }).toDestination();
+
+    // Attach press and release events
+    document.querySelectorAll(".action-button").forEach(button => {
+      const note = button.getAttribute("data-note");
+
+      // Press down → start note
+      button.addEventListener("mousedown", async () => {
+        await Tone.start();
+        synth.triggerAttack(note);
+      });
+      button.addEventListener("touchstart", async (e) => {
+        e.preventDefault(); // Prevent default to avoid mouse event conflicts
+        await Tone.start();
+        synth.triggerAttack(note);
+      });
+
+      // Release → stop note
+      button.addEventListener("mouseup", () => {
+        synth.triggerRelease();
+      });
+      button.addEventListener("mouseleave", () => {
+        synth.triggerRelease();
+      });
+      button.addEventListener("touchend", () => {
+        synth.triggerRelease();
+      });
+    });
+  </script>
+</body>
+</html>
